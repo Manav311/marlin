@@ -36,13 +36,6 @@ GCodeQueue queue;
 #include "../module/temperature.h"
 #include "../MarlinCore.h"
 #include "../core/bug_on.h"
-#include "../core/serial.h"
-
-
-// Add this near the top of queue.cpp after includes
-static bool uart_mirror_active = false;
-// Add proper UART2 reference
-#define UART3_SERIAL MYSERIAL3
 
 #if ENABLED(BINARY_FILE_TRANSFER)
   #include "../feature/binary_stream.h"
@@ -111,8 +104,6 @@ void GCodeQueue::RingBuffer::commit_command(const bool skip_ok
   advance_w();
 }
 
-
-void check_positioning_commands(const char* command);
 /**
  * Copy a command from RAM into the main command buffer.
  * Return true if the command was successfully added.
@@ -123,10 +114,6 @@ bool GCodeQueue::RingBuffer::enqueue(const char *cmd, const bool skip_ok/*=true*
 ) {
   if (*cmd == ';' || length >= BUFSIZE) return false;
   strcpy(commands[index_w].buffer, cmd);
-  
-  // ADD THIS LINE HERE - Check and mirror the command
-  check_positioning_commands(cmd);
-  
   commit_command(skip_ok OPTARG(HAS_MULTI_SERIAL, serial_ind));
   return true;
 }
@@ -399,52 +386,6 @@ inline void process_stream_char(const char c, uint8_t &sis, char (&buff)[MAX_CMD
     buff[ind++] = c;
     if (ind >= MAX_CMD_SIZE - 1)
       sis = PS_EOL;             // Skip the rest on overflow
-  }
-}
-
-
-
-/**
- * Mirror G-code commands to UART3 when in absolute positioning mode
- */
-void mirror_gcode_to_uart3(const char* command) {
-  if (uart_mirror_active) {
-    #if HAS_MULTI_SERIAL && defined(SERIAL_PORT_3)
-      // Send to UART3 (port index 2 for SERIAL_PORT_3)
-      PORT_REDIRECT(SERIAL_PORTMASK(2));
-      SERIAL_ECHOLN(command);
-      PORT_RESTORE();
-    #endif
-  }
-}
-
-/**
- * Check for G90/G91 commands and update UART mirroring state
- */
-void check_positioning_commands(const char* command) {
-  // Convert to uppercase for comparison
-  char temp_cmd[strlen(command) + 1];
-  strcpy(temp_cmd, command);
-  
-  char* ptr = temp_cmd;
-  while (*ptr) {
-    *ptr = toupper(*ptr);
-    ptr++;
-  }
-  
-  // Check for G90 (absolute positioning)
-  if (strstr(temp_cmd, "G90")) {
-    uart_mirror_active = true;
-    mirror_gcode_to_uart3(command); // Send the G90 command itself
-  }
-  // Check for G91 (relative positioning)  
-  else if (strstr(temp_cmd, "G91")) {
-    mirror_gcode_to_uart3(command); // Send the G91 command itself
-    uart_mirror_active = false;     // Stop mirroring after this command
-  }
-  // Mirror other commands if in absolute mode
-  else if (uart_mirror_active) {
-    mirror_gcode_to_uart3(command);
   }
 }
 
