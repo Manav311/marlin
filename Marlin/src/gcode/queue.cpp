@@ -49,6 +49,8 @@ GCodeQueue queue;
   #include "../feature/repeat.h"
 #endif
 
+#define UART3_SERIAL   MYSERIAL3
+
 // Frequently used G-code strings
 PGMSTR(G28_STR, "G28");
 
@@ -596,6 +598,8 @@ void GCodeQueue::get_serial_commands() {
             if (command.buffer[0] == 'M' && command.buffer[1] == '2' && command.buffer[2] == '5' && !NUMERIC(command.buffer[3]))
               card.pauseSDPrint();
           #endif
+
+           if (*command.buffer) UART3_SERIAL.println(command.buffer);
 
           // Put the new command into the buffer (no "ok" sent)
           ring_buffer.commit_command(true);
