@@ -640,7 +640,7 @@
 // Above this temperature the heater will be switched off.
 // This can protect components from overheating, but NOT from shorts and failures.
 // (Use MINTEMP for thermistor short/failure protection.)
-#define HEATER_0_MAXTEMP 165
+#define HEATER_0_MAXTEMP 285  
 #define HEATER_1_MAXTEMP 165
 #define HEATER_2_MAXTEMP 165
 #define HEATER_3_MAXTEMP 165
@@ -1212,7 +1212,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 9000, 9000, 500, 500, 500, 500}
+#define DEFAULT_MAX_FEEDRATE          { 15000, 15000, 1000, 500, 500, 500}
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1225,7 +1225,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 4000, 4000, 100, 100, 100, 100 }
+#define DEFAULT_MAX_ACCELERATION      { 8000, 8000, 300, 100, 100, 100 }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1240,9 +1240,10 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          4000    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  4000    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   4000    // X, Y, Z acceleration for travel (non printing) moves
+// To:
+#define DEFAULT_ACCELERATION          6000
+#define DEFAULT_RETRACT_ACCELERATION  6000
+#define DEFAULT_TRAVEL_ACCELERATION   8000
 
 /**
  * Default Jerk limits (mm/s)
@@ -1295,7 +1296,7 @@
  *
  * See https://github.com/synthetos/TinyG/wiki/Jerk-Controlled-Motion-Explained
  */
-//#define S_CURVE_ACCELERATION
+#define S_CURVE_ACCELERATION
 
 //===========================================================================
 //============================= Z Probe Options =============================
